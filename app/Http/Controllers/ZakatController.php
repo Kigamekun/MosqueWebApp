@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Zakat;
 use Illuminate\Http\Request;
+use App\Services\Midtrans\CreateSnapTokenService;
+use App\Mail\ZakatMail;
+use Illuminate\Support\Facades\Mail;
 
 class ZakatController extends Controller
 {
@@ -42,73 +45,58 @@ class ZakatController extends Controller
         return view('materi-pengetahuan.index');
     }
 
-    public function guest(Request $request)
+    public function bayar(Request $request)
     {
-        if ($request->ajax()) {
-            $data = MateriPengetahuan::whereNull('deleted_at')->select('id', 'judul_materi', 'tahun_materi', 'file_materi')->get();
-            return DataTables::of($data)
-            ->addIndexColumn()
-            ->addColumn('priview-pdf', function ($row) {
-                $btn = '
-                <div class="d-flex">
-                    <a class="btn btn-sm btn-biru"
-                        href="' . asset('storage/materiPengetahuan/'.$row->file_materi) . '" target="_blank"> <i class="bi bi-trash"></i> Lihat
-                    </a>
-                </div>
-                ';
-                return $btn;
-            })
-            ->rawColumns(['priview-pdf'])
-            ->make(true);
-        }
-        return view('materi-pengetahuan.guest');
+        $midtrans = new CreateSnapTokenService($request->all());
+        $snapToken = $midtrans->getSnapToken();
+        return response()->json(['message' => 'Token berhasil di load', 'status' => 'success','data' => $snapToken, 'statusCode' => 200], 200);
     }
 
-    public function store(CreateMateriPengetahuanRequest $request)
+    public function store(Request $request)
     {
-        DB::beginTransaction();
+        // try {
+        //     $request->validate([
+        //         'title' => 'required',
+        //         'description' => 'required',
+        //         'start_date' => 'required',
+        //         'end_date' => 'required',
 
-        try {
-            $this->validate($request, [
-                'file_materi' => 'required|file|mimes:pdf|max:30720',
-            ]);
+        //     ]);
+        // } catch (\Throwable $th) {
+        //     return response()->json(['message' => 'Data tidak lengkap', 'status' => 'error', 'statusCode' => 400,'errors' => $th->validator->errors()], 400);
+        // }
 
-            $file = $request->file('file_materi');
-            $filename = time() . '-' . $file->getClientOriginalName();
-            Storage::disk('public')->put('materiPengetahuan/'.$filename, file_get_contents($file));
+        $zakat = new Zakat();
+        $zakat->name = $request->name;
+        $zakat->gender = $request->gender;
+        $zakat->email = $request->email;
+        $zakat->phone = $request->phone;
+        $zakat->amount = $request->amount;
+        $zakat->status = 'pending';
+        $zakat->type = $request->type;
 
-            $data = $request->validated();
-            $data['file_materi'] = $filename;
+        $zakat->date = now();
+        $zakat->midtrans_token = $request->midtrans_token;
 
-            MateriPengetahuan::create($data);
+        $zakat->save();
 
-            DB::commit();
-
-            return redirect()->back()->with(['message' => 'Materi berhasil ditambahkan','status' => 'success']);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return redirect()->back()->with(['message' => $th->getMessage(),'status' => 'error']);
-        }
+        return response()->json(['message' => 'Zakat berhasil di tambahkan', 'status' => 'success','data' => $zakat, 'statusCode' => 200], 200);
     }
 
-    public function destroy($id)
+    public function changeStatus(Request $request, $id)
     {
-        DB::beginTransaction();
+        $zakat = Zakat::findOrFail($id);
+        $zakat->status = $request->status;
+        // $zakat->approver_id = auth()->user()->id;
+        $zakat->save();
 
-        try {
-            $materiPengetahuan = MateriPengetahuan::findOrFail($id);
-            if ($materiPengetahuan->file_materi) {
-                $filePath = Storage::disk('public')->path('materiPengetahuan/'.$materiPengetahuan->file_materi);
-                File::delete($filePath);
-            }
-            $materiPengetahuan->delete();
-
-            DB::commit();
-
-            return redirect()->back()->with(['message' => 'Materi berhasil di Hapus','status' => 'success']);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return redirect()->back()->with(['message' => $th->getMessage(),'status' => 'error']);
+        if ($request->status == 'disalurkan') {
+            Mail::to($zakat->email)->send(new ZakatMail());
         }
+
+        return response()->json(['message' => 'Zakat berhasil di update', 'status' => 'success','data' => $zakat, 'statusCode' => 200], 200);
     }
+
+
+
 }

@@ -13,10 +13,22 @@ return new class extends Migration
     {
         Schema::create('zakats', function (Blueprint $table) {
             $table->id();
+
+            $table->string('name');
+            $table->enum('gender',['laki-laki','perempuan']);
+            $table->string('phone');
+            $table->string('email');
+
             $table->double('amount');
             $table->enum('type', ['fitrah', 'maal']);
             $table->date('date');
-            $table->unsignedBigInteger('user_id')->nullable();
+
+            $table->enum('status',['pending','diterima','disalurkan'])->default('pending');
+
+            $table->string('midtrans_token');
+
+            $table->unsignedBigInteger('approver_id')->nullable();
+            $table->foreign('approver_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
