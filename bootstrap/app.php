@@ -5,7 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
-
+use Illuminate\Auth\AuthenticationException;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -17,6 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Not authenticated'
+                ], 401);
+            }
+        });
         $exceptions->render(function (ValidationException $e, Request $request) {
             if ($request->expectsJson()) {
                 return response()->json([
@@ -25,7 +32,6 @@ return Application::configure(basePath: dirname(__DIR__))
                     'data'    => $e->errors()
                 ], 200);
             }
-
             return null;
         });
     })->create();

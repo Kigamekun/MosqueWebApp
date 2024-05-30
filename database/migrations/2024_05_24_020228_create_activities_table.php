@@ -20,6 +20,8 @@ return new class () extends Migration {
             $table->unsignedBigInteger('user_id');
             $table->foreign('reservasi_id')->references('id')->on('reservasis')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+            $table->string('thumbnail')->nullable();
             $table->timestamps();
         });
     }
