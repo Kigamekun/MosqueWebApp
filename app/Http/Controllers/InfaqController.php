@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Infaq};
+use App\Models\{Infaq,User};
 use Illuminate\Http\Request;
 
 class InfaqController extends Controller
