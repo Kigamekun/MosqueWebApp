@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('email');
 
             $table->double('amount');
-            $table->enum('type', ['fitrah', 'maal']);
+            $table->enum('type', ['penghasilan', 'maal']);
             $table->date('date');
 
             $table->enum('status',['pending','diterima','disalurkan'])->default('pending');

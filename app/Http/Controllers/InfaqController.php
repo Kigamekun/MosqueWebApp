@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Infaq;
+use App\Models\{Infaq};
 use Illuminate\Http\Request;
 
 class InfaqController extends Controller
@@ -49,6 +49,10 @@ class InfaqController extends Controller
             $infaq = Infaq::orderBy('verifier_id', $sort_verifier)->paginate(10);
         } else {
             $infaq = Infaq::paginate(10);
+            $infaq->getCollection()->transform(function($in) {
+                $in->user = User::find($in->verifier_id);
+                return $in;
+            });
         }
         return response()->json(['message' => 'Data berhasil di load', 'status' => 'success','data' => $infaq, 'statusCode' => 200], 200);
     }
