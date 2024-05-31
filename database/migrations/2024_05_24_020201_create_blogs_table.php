@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('content');
+            $table->string('description')->nullable();
             $table->dateTime('date');
             $table->enum ('type', ['berita','blog'])->default('blog');
             $table->unsignedBigInteger('user_id');

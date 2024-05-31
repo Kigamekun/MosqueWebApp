@@ -23,6 +23,8 @@ return new class extends Migration
             $table->enum('type', ['penghasilan', 'maal']);
             $table->date('date');
 
+            $table->string('penerima')->nullable();
+
             $table->enum('status',['pending','diterima','disalurkan'])->default('pending');
 
             $table->string('midtrans_token');
