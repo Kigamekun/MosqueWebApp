@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\{BlogController, ActivityController, ReservasiController, InfaqController, ZakatController, PrayerTimeController};
+use App\Http\Controllers\{DashboardController, BlogController, ActivityController, ReservasiController, InfaqController, ZakatController, PrayerTimeController};
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -16,6 +16,9 @@ Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']
 Route::get('/getFile/{folder}/{filename}', function ($folder,$filename) {
     return response()->file(storage_path('app/public/').$folder.'/'.$filename);
 });
+
+Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+
 
 Route::prefix('blog')->group(function () {
     Route::get('/', [BlogController::class, 'index'])->name('blog.index');
@@ -51,7 +54,7 @@ Route::prefix('zakat')->group(function () {
     Route::post('/change-status/{id}', [ZakatController::class, 'changeStatus'])->middleware('auth:sanctum')->name('zakat.change-status');
 
 
-    Route::post('/', [ZakatController::class, 'store'])->middleware('auth:sanctum')->name('zakat.store');
+    Route::post('/', [ZakatController::class, 'store'])->name('zakat.store');
     Route::get('/{id}', [ZakatController::class, 'show'])->middleware('auth:sanctum')->name('zakat.show');
     Route::patch('/{id}', [ZakatController::class, 'update'])->middleware('auth:sanctum')->name('zakat.update');
     Route::delete('/{id}', [ZakatController::class, 'destroy'])->middleware('auth:sanctum')->name('zakat.destroy');

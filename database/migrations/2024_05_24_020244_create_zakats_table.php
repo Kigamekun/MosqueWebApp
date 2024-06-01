@@ -29,6 +29,13 @@ return new class extends Migration
 
             $table->string('midtrans_token');
 
+            $table->string('order_id')->nullable();
+            $table->string('transaction_id')->nullable();
+            $table->string('payment_type')->nullable();
+
+
+
+
             $table->unsignedBigInteger('approver_id')->nullable();
             $table->foreign('approver_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();

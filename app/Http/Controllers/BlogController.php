@@ -14,12 +14,12 @@ class BlogController extends Controller
     {
         if (isset($_GET['type'])) {
             $type = $_GET['type'];
-            $blogs = Blog::where('type', $type)->paginate(10);
+            $blogs = Blog::where('type', $type)->paginate(100);
         } elseif (isset($_GET['search'])) {
             $search = $_GET['search'];
-            $blogs = Blog::where('title', 'like', '%' . $search . '%')->paginate(10);
+            $blogs = Blog::where('title', 'like', '%' . $search . '%')->paginate(100);
         } else {
-            $blogs = Blog::paginate(10);
+            $blogs = Blog::paginate(100);
         }
         return response()->json(['message' => 'Data berhasil di load', 'status' => 'success','data' => $blogs, 'statusCode' => 200], 200);
     }
