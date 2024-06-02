@@ -55,7 +55,7 @@ class InfaqController extends Controller
                 return $in;
             });
         }
-        return response()->json(['message' => 'Data berhasil di load', 'status' => 'success','data' => $infaq,'totalInfaq'=>number_format(Infaq::sum('amount') , 0, ',', '.'), 'statusCode' => 200], 200);
+        return response()->json(['message' => 'Data berhasil di load', 'status' => 'success','data' => $infaq,'totalInfaq'=>'Rp. '.number_format(Infaq::sum('amount') , 0, ',', '.'), 'statusCode' => 200], 200);
     }
 
     public function store(Request $request)
