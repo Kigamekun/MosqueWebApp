@@ -27,6 +27,7 @@ class BlogController extends Controller
 
     public function store(Request $request)
     {
+        dd($request->all());
         try {
             $request->validate([
                 'title' => 'required',
