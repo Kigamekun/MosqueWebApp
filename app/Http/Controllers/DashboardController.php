@@ -8,7 +8,8 @@ class DashboardController extends Controller
 {
     public function dashboard(Request $request)
     {
-        $jumlahZakat = Zakat::groupBy('name')->count();
+        $result = DB::select('SELECT count_unique_names_in_zakat() as total');
+        $jumlahZakat = $result[0]->total;
         $zakatTotal = Zakat::sum('amount');
         $infaqTotal = Infaq::sum('amount');
 
