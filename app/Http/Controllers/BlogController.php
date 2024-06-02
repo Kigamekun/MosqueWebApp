@@ -27,7 +27,6 @@ class BlogController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all());
         try {
             $request->validate([
                 'title' => 'required',
@@ -51,6 +50,8 @@ class BlogController extends Controller
             $filename = time() . '-' . $file->getClientOriginalName();
             Storage::disk('public')->put('blog/'.$filename, file_get_contents($file));
             $blog->thumbnail = $filename;
+
+            dd($filename);
         }
         $blog->save();
 
