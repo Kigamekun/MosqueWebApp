@@ -16,7 +16,7 @@ class ZakatController extends Controller
         if (isset($_GET['amount_min']) && isset($_GET['amount_max'])) {
             $amount_min = $_GET['amount_min'];
             $amount_max = $_GET['amount_max'];
-            $zakat = DB::select('SELECT *  FROM public.zakat WHERE amount BETWEEN '.$amount_min.' AND '.$amount_max.';');
+            $zakat = DB::select('SELECT *  FROM public.zakats WHERE amount BETWEEN '.$amount_min.' AND '.$amount_max.';');
         } else {
             $zakat = DB::select(' SELECT *  FROM public.zakats');
         }
