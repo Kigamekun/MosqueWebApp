@@ -23,8 +23,9 @@ class ZakatController extends Controller
 
         $zakat_unik = DB::select('SELECT DISTINCT type,count(zakats.type) FROM public.zakats GROUP BY zakats.type;');
 
+        $zakat = collect($zakat);
 
-        $zakat->getCollection()->transform(function ($in) {
+        $zakat->transform(function ($in) {
             $in->amount = 'Rp. ' . number_format($in->amount, 0, ',', '.');
             $us = User::find($in->approver_id);
             if ($us != null) {
