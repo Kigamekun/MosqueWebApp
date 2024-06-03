@@ -12,7 +12,7 @@ class ActivityController extends Controller
         if (isset($_GET['search'])) {
             $search = $_GET['search'];
             $blogs = Activity::where('title', 'like', '%' . $search . '%')->paginate(10);
-        } else if ($_GET['type'] == 'coming'){
+        } else if (isset($_GET['type']) && $_GET['type'] == 'coming'){
             $activities = Activity::where('start_date', '>', Carbon::now())->get();
 
             $groupedActivities = $activities->groupBy(function($activity) {
@@ -30,7 +30,7 @@ class ActivityController extends Controller
                 'data' => $formattedData,
                 'statusCode' => 200
             ], 200);
-        } else if ($_GET['type'] == 'today'){
+        } else if (isset($_GET['type']) && $_GET['type'] == 'today'){
 
             $activities = Activity::whereDate('start_date', Carbon::today())->get();
 
