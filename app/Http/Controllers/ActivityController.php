@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Activity;
 use Illuminate\Http\Request;
-
+use Carbon\Carbon;
 class ActivityController extends Controller
 {
     public function index(Request $request)
@@ -12,6 +12,44 @@ class ActivityController extends Controller
         if (isset($_GET['search'])) {
             $search = $_GET['search'];
             $blogs = Activity::where('title', 'like', '%' . $search . '%')->paginate(10);
+        } else if ($_GET['type'] == 'coming'){
+            $activities = Activity::where('start_date', '>', Carbon::now())->get();
+
+            $groupedActivities = $activities->groupBy(function($activity) {
+                return Carbon::parse($activity->start_date)->format('m-Y');
+            });
+
+            $formattedData = [];
+            foreach ($groupedActivities as $month => $activities) {
+                $formattedData[$month] = $activities;
+            }
+
+            return response()->json([
+                'message' => 'Data berhasil di load',
+                'status' => 'success',
+                'data' => $formattedData,
+                'statusCode' => 200
+            ], 200);
+        } else if ($_GET['type'] == 'today'){
+
+            $activities = Activity::whereDate('start_date', Carbon::today())->get();
+
+            $groupedActivities = $activities->groupBy(function($activity) {
+                return Carbon::parse($activity->start_date)->format('m-Y');
+            });
+
+            $formattedData = [];
+            foreach ($groupedActivities as $month => $activities) {
+                $formattedData[$month] = $activities;
+            }
+
+            return response()->json([
+                'message' => 'Data berhasil di load',
+                'status' => 'success',
+                'data' => $formattedData,
+                'statusCode' => 200
+            ], 200);
+
         } else {
             $blogs = Activity::paginate(10);
         }
