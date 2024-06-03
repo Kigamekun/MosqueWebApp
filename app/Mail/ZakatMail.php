@@ -13,12 +13,14 @@ class ZakatMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $zakat;
+
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct($zakat)
     {
-        //
+        $this->zakat = $zakat;
     }
 
     /**
@@ -38,6 +40,7 @@ class ZakatMail extends Mailable
     {
         return new Content(
             view: 'mail.zakat',
+            with: ['zakat' => $this->zakat],
         );
     }
 

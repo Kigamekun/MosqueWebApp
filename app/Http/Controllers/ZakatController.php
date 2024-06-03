@@ -97,11 +97,16 @@ class ZakatController extends Controller
         $zakat = Zakat::findOrFail($id);
         $zakat->status = $request->status;
         if ($request->status == 'disalurkan') {
-            Mail::to($zakat->email)->send(new ZakatMail());
             $zakat->penerima = $request->penerima;
         }
         $zakat->approver_id = auth()->user()->id;
         $zakat->save();
+
+
+        if ($request->status == 'disalurkan') {
+            $zakat = Zakat::findOrFail($id);
+            Mail::to($zakat->email)->send(new ZakatMail($zakat));
+        }
         return response()->json(['message' => 'Zakat berhasil di update', 'status' => 'success','data' => $zakat, 'statusCode' => 200], 200);
     }
 

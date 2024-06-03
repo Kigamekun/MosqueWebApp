@@ -39,9 +39,9 @@
 
             <div class="wrapperBody" style="background: #fff; padding: 1.4rem 3rem; border-radius: 0 0 10px 10px;">
                 <div class="text" style="text-align: center; font-family: 'Poppins', sans-serif;">
-                    <p style="margin: 0;">Hi <span class="name" style="font-weight: 600;">Davino</span></p>
+                    <p style="margin: 0;">Hi <span class="name" style="font-weight: 600;">{{$zakat->name}}</span></p>
                     <p style="margin: 0;">Zakat anda telah diterima oleh, <span class="numberRequest"
-                            style="color: #1A4D2E; font-weight: 600;">Reksa Prayoga Syahputra</span></p>
+                            style="color: #1A4D2E; font-weight: 600;">{{ $zakat->penerima }}</span></p>
 
                 </div>
 
