@@ -7,58 +7,31 @@ use Illuminate\Http\Request;
 use App\Services\Midtrans\CreateSnapTokenService;
 use App\Mail\ZakatMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 class ZakatController extends Controller
 {
     public function index(Request $request)
     {
-        if (isset($_GET['search'])) {
-            $search = $_GET['search'];
-            $zakat = Zakat::where('name', 'like', '%' . $search . '%')->paginate(10);
-        } elseif (isset($_GET['start_date']) && isset($_GET['end_date'])) {
-            $start_date = $_GET['start_date'];
-            $end_date = $_GET['end_date'];
-            $zakat = Zakat::whereBetween('date', [$start_date, $end_date])->paginate(10);
-        } elseif (isset($_GET['start_date'])) {
-            $start_date = $_GET['start_date'];
-            $zakat = Zakat::where('date', '>=', $start_date)->paginate(10);
-        } elseif (isset($_GET['end_date'])) {
-            $end_date = $_GET['end_date'];
-            $zakat = Zakat::where('date', '<=', $end_date)->paginate(10);
-        } elseif (isset($_GET['status'])) {
-            $status = $_GET['status'];
-            $zakat = Zakat::where('status', $status)->paginate(10);
-        } elseif (isset($_GET['amount'])) {
-            $amount = $_GET['amount'];
-            $zakat = Zakat::where('amount', $amount)->paginate(10);
-        } elseif (isset($_GET['amount_min']) && isset($_GET['amount_max'])) {
+        if (isset($_GET['amount_min']) && isset($_GET['amount_max'])) {
             $amount_min = $_GET['amount_min'];
             $amount_max = $_GET['amount_max'];
-            $zakat = Zakat::whereBetween('amount', [$amount_min, $amount_max])->paginate(10);
-        } elseif (isset($_GET['amount_min'])) {
-            $amount_min = $_GET['amount_min'];
-            $zakat = Zakat::where('amount', '>=', $amount_min)->paginate(10);
-        } elseif (isset($_GET['amount_max'])) {
-            $amount_max = $_GET['amount_max'];
-            $zakat = Zakat::where('amount', '<=', $amount_max)->paginate(10);
-        } elseif (isset($_GET['sort'])) {
-            $sort = $_GET['sort'];
-            $zakat = Zakat::orderBy('amount', $sort)->paginate(10);
+            $zakat = DB::select('SELECT *  FROM public.zakat WHERE amount BETWEEN '.$amount_min.' AND '.$amount_max.';');
         } else {
-            $zakat = Zakat::paginate(10);
+            $zakat = DB::select(' SELECT *  FROM public.zakats');
         }
 
+        $zakat_unik = DB::select('SELECT DISTINCT type,count(zakats.type) FROM public.zakats GROUP BY zakats.type;');
+
+
         $zakat->getCollection()->transform(function ($in) {
-
             $in->amount = 'Rp. ' . number_format($in->amount, 0, ',', '.');
-
             $us = User::find($in->approver_id);
             if ($us != null) {
                 $in->amil = $us->name;
             } else {
                 $in->amil = '-';
             }
-
             if ($in->midtrans_token != '-') {
                 $in->payment = [
                     'transaction_id' => $in->transaction_id,
@@ -74,8 +47,7 @@ class ZakatController extends Controller
             }
             return $in;
         });
-
-        return response()->json(['message' => 'Data berhasil di load', 'status' => 'success','data' => $zakat,'total'=>  number_format( Zakat::sum('amount') , 0, ',', '.'), 'statusCode' => 200], 200);
+        return response()->json(['message' => 'Data berhasil di load', 'status' => 'success','data' => ['data'=>$zakat],'zakat_unik' => $zakat_unik,'total' =>  number_format(Zakat::sum('amount'), 0, ',', '.'), 'statusCode' => 200], 200);
     }
 
     public function bayar(Request $request)

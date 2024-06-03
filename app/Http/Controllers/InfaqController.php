@@ -5,57 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\{Infaq,User};
 use Illuminate\Http\Request;
 use DataTables;
+use Illuminate\Support\Facades\DB;
+
 
 class InfaqController extends Controller
 {
     public function index(Request $request)
     {
-        if (isset($_GET['search'])) {
-            $search = $_GET['search'];
-            $infaq = Infaq::where('title', 'like', '%' . $search . '%')->paginate(100);
-        } elseif (isset($_GET['start_date']) && isset($_GET['end_date'])) {
-            $start_date = $_GET['start_date'];
-            $end_date = $_GET['end_date'];
-            $infaq = Infaq::whereBetween('date', [$start_date, $end_date])->paginate(100);
-        } elseif (isset($_GET['start_date'])) {
-            $start_date = $_GET['start_date'];
-            $infaq = Infaq::where('date', '>=', $start_date)->paginate(100);
-        } elseif (isset($_GET['end_date'])) {
-            $end_date = $_GET['end_date'];
-            $infaq = Infaq::where('date', '<=', $end_date)->paginate(100);
-        } elseif (isset($_GET['verifier_id'])) {
-            $verifier_id = $_GET['verifier_id'];
-            $infaq = Infaq::where('verifier_id', $verifier_id)->paginate(100);
-        } elseif (isset($_GET['amount'])) {
-            $amount = $_GET['amount'];
-            $infaq = Infaq::where('amount', $amount)->paginate(100);
-        } elseif (isset($_GET['amount_min']) && isset($_GET['amount_max'])) {
-            $amount_min = $_GET['amount_min'];
-            $amount_max = $_GET['amount_max'];
-            $infaq = Infaq::whereBetween('amount', [$amount_min, $amount_max])->paginate(100);
-        } elseif (isset($_GET['amount_min'])) {
-            $amount_min = $_GET['amount_min'];
-            $infaq = Infaq::where('amount', '>=', $amount_min)->paginate(100);
-        } elseif (isset($_GET['amount_max'])) {
-            $amount_max = $_GET['amount_max'];
-            $infaq = Infaq::where('amount', '<=', $amount_max)->paginate(100);
-        } elseif (isset($_GET['sort'])) {
-            $sort = $_GET['sort'];
-            $infaq = Infaq::orderBy('amount', $sort)->paginate(100);
-        } elseif (isset($_GET['sort_date'])) {
-            $sort_date = $_GET['sort_date'];
-            $infaq = Infaq::orderBy('date', $sort_date)->paginate(100);
-        } elseif (isset($_GET['sort_verifier'])) {
-            $sort_verifier = $_GET['sort_verifier'];
-            $infaq = Infaq::orderBy('verifier_id', $sort_verifier)->paginate(100);
-        } else {
-            $infaq = Infaq::paginate(100);
-            $infaq->getCollection()->transform(function ($in) {
-                $in->user = User::find($in->verifier_id);
-                return $in;
-            });
-        }
-        return response()->json(['message' => 'Data berhasil di load', 'status' => 'success','data' => $infaq,'totalInfaq'=>'Rp. '.number_format(Infaq::sum('amount') , 0, ',', '.'), 'statusCode' => 200], 200);
+        $infaq = DB::select(' SELECT infaqs.* ,users.name  FROM public.infaqs RIGHT JOIN public.users ON infaqs.verifier_id = users.id ORDER BY infaqs.amount DESC');
+        return response()->json(['message' => 'Data berhasil di load', 'status' => 'success','data' => ['data'=>$infaq],'totalInfaq'=>'Rp. '.number_format(Infaq::sum('amount') , 0, ',', '.'), 'statusCode' => 200], 200);
     }
 
     public function store(Request $request)

@@ -12,16 +12,17 @@ class BlogController extends Controller
 {
     public function index(Request $request)
     {
-        if (isset($_GET['type'])) {
-            $type = $_GET['type'];
-            $blogs = Blog::where('type', $type)->paginate(100);
+        if (isset($_GET['id'])) {
+            $blogs = DB::select('SELECT b.*, u.name FROM public.blogs as b INNER JOIN public.users as u ON b.user_id = u.id WHERE b.id ='.$_GET['id'].';');
+
         } elseif (isset($_GET['search'])) {
-            $search = $_GET['search'];
-            $blogs = Blog::where('title', 'like', '%' . $search . '%')->paginate(100);
+            $blogs = DB::select('SELECT b.*, u.name FROM public.blogs as b INNER JOIN public.users as u ON b.user_id = u.id WHERE b.title ilike %'.$search.'%;');
         } else {
-            $blogs = Blog::paginate(100);
+            $blogs = DB::select(
+                'SELECT b.*, u.name FROM public.blogs as b INNER JOIN public.users as u ON b.user_id = u.id'
+            );
         }
-        return response()->json(['message' => 'Data berhasil di load', 'status' => 'success','data' => $blogs, 'statusCode' => 200], 200);
+        return response()->json(['message' => 'Data berhasil di load', 'status' => 'success','data' => ['data'=>$blogs], 'statusCode' => 200], 200);
     }
 
 
