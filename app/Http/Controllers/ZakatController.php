@@ -16,7 +16,15 @@ class ZakatController extends Controller
         if (isset($_GET['amount_min']) && isset($_GET['amount_max'])) {
             $amount_min = $_GET['amount_min'];
             $amount_max = $_GET['amount_max'];
-            $zakat = DB::select('SELECT *  FROM public.zakats WHERE amount BETWEEN '.$amount_min.' AND '.$amount_max.';');
+
+            if ($amount_min == '' or $amount_max == '') {
+                $zakat = DB::select(' SELECT *  FROM public.zakats');
+
+            } else {
+                $zakat = DB::select('SELECT *  FROM public.zakats WHERE amount BETWEEN '.$amount_min.' AND '.$amount_max.';');
+
+            }
+
         } else {
             $zakat = DB::select(' SELECT *  FROM public.zakats');
         }
@@ -48,7 +56,7 @@ class ZakatController extends Controller
             }
             return $in;
         });
-        return response()->json(['message' => 'Data berhasil di load', 'status' => 'success','data' => ['data'=>$zakat],'zakat_unik' => $zakat_unik,'total' =>  number_format(Zakat::sum('amount'), 0, ',', '.'), 'statusCode' => 200], 200);
+        return response()->json(['message' => 'Data berhasil di load', 'status' => 'success','data' => ['data' => $zakat],'zakat_unik' => $zakat_unik,'total' =>  number_format(Zakat::sum('amount'), 0, ',', '.'), 'statusCode' => 200], 200);
     }
 
     public function bayar(Request $request)
